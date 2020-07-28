@@ -7,6 +7,7 @@ import CustomParse from "dayjs/plugin/customParseFormat";
 import { kebabCase } from "lodash";
 
 import { BaseAction } from "./base.action";
+import { TableHints } from "sequelize/types";
 
 dayjs.extend(CustomParse);
 
@@ -31,7 +32,10 @@ export class NormalizeAction {
           path.resolve(
             cwd,
             p,
-            `${day.format(to)}-${kebabCase(filename.join("-"))}`
+            `${day.format(to)}-${kebabCase(filename.join("-")).replace(
+              "-ts",
+              ".ts"
+            )}`
           )
         );
       })
@@ -42,13 +46,16 @@ export class NormalizeAction {
     const config = await this.base.getConfig();
     const cwd = process.cwd();
 
+    this.base.logger.info("Changing format of files");
     const format = to ?? config.dateFormat ?? "YYYY.MM.DD.HH.mm.ss";
 
     if (!format) {
       throw new Error("Format must be passed");
     }
 
+    this.base.logger.info("Renaming");
     await this.rename(config.migrations, from, format, cwd);
     await this.rename(config.seeds, from, format, cwd);
+    this.base.logger.success("Files renamed successfully");
   }
 }

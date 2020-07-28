@@ -28,6 +28,24 @@ export function getConfiguration(
           test: /\.ts$/,
           use: [
             {
+              loader: "babel-loader",
+              options: {
+                babelrc: false,
+                configFile: false,
+                presets: [
+                  [
+                    "@babel/preset-env",
+                    {
+                      module: "cjs",
+                      target: {
+                        node: "current",
+                      },
+                    },
+                  ],
+                ],
+              },
+            },
+            {
               loader: "ts-loader",
               options: {
                 transpileOnly: true,

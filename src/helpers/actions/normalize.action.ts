@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs-extra";
 import dayjs from "dayjs";
 import CustomParse from "dayjs/plugin/customParseFormat";
+import { kebabCase } from "lodash";
 
 import { BaseAction } from "./base.action";
 
@@ -27,7 +28,11 @@ export class NormalizeAction {
 
         return fs.rename(
           path.resolve(cwd, f),
-          path.resolve(cwd, p, `${day.format(to)}-${filename.join("-")}`)
+          path.resolve(
+            cwd,
+            p,
+            `${day.format(to)}-${kebabCase(filename.join("-"))}`
+          )
         );
       })
     );
@@ -37,7 +42,7 @@ export class NormalizeAction {
     const config = await this.base.getConfig();
     const cwd = process.cwd();
 
-    const format = to ?? config.dateFormat;
+    const format = to ?? config.dateFormat ?? "YYYY.MM.DD.HH.mm.ss";
 
     if (!format) {
       throw new Error("Format must be passed");

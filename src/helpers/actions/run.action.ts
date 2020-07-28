@@ -97,7 +97,7 @@ export class RunAction {
 
     if (params.undo) {
       let i = 0;
-      for (const f of files) {
+      for (const f of files.reverse()) {
         const inst = already.find((a) => path.basename(f).includes(a.name));
 
         if (inst) {

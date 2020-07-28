@@ -37,7 +37,7 @@ export function getConfiguration(
                     "@babel/preset-env",
                     {
                       modules: "cjs",
-                      target: {
+                      targets: {
                         node: "current",
                       },
                     },

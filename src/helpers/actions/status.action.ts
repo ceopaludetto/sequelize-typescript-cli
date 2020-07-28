@@ -1,0 +1,71 @@
+import { Service, Inject } from "typedi";
+import glob from "glob";
+import chalk from "chalk";
+import path from "path";
+
+import { BaseAction, SequelizeStatus } from "./base.action";
+import { Type } from "../../utils/types";
+
+@Service()
+export class StatusAction {
+  @Inject()
+  private readonly base: BaseAction;
+
+  private print(files: string[], runned: SequelizeStatus[], type?: Type) {
+    files.forEach((f) => {
+      const status = runned.find((x) => {
+        if (type) {
+          x.name === path.basename(f, ".ts") && x.type === type;
+        } else {
+          x.name === path.basename(f, ".ts");
+        }
+      });
+
+      if (status) {
+        console.log("-", f + ":", chalk.green("runned"));
+      } else {
+        console.log("-", f + ":", chalk.red("to run"));
+      }
+    });
+  }
+
+  public async run(type?: Type) {
+    const config = await this.base.getConfig();
+    const model = await this.base.getStatusModel(config);
+
+    this.base.logger.info("Checking status");
+
+    if (type) {
+      const runned = await model.findAll({ where: { type: type } });
+
+      const p = type === "migration" ? config.migrations : config.seeds;
+
+      const files = glob.sync(p + "/*.ts", { cwd: process.cwd() });
+
+      this.base.logger.info(`Founded ${files.length} ${type}s`);
+
+      this.print(files, runned);
+    } else {
+      const runned = await model.findAll();
+
+      const migrations = glob.sync(config.migrations + "/*.ts", {
+        cwd: process.cwd(),
+      });
+      const seeds = glob.sync(config.seeds + "/*.ts", { cwd: process.cwd() });
+
+      if (migrations.length) {
+        this.base.logger.info(`Founded ${migrations.length} migrations`);
+
+        this.print(migrations, runned, "migration");
+      }
+
+      if (seeds.length) {
+        this.base.logger.info(`Founded ${seeds.length} seeds`);
+
+        this.print(seeds, runned, "seed");
+      }
+    }
+
+    this.base.logger.success("Check status runned succesfully");
+  }
+}

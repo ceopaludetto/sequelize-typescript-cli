@@ -108,7 +108,7 @@ export async function bootstrap() {
 
     if (base.hasSequelize()) {
       base.logger.verbose("Closing database connection");
-      await (await base.getSequelize()).close();
+      await (await base.getConnection()).destroy();
     }
   } catch (error) {
     base.logger.error(error.message);

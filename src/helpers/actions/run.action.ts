@@ -2,26 +2,19 @@ import { Service, Inject } from "typedi";
 import glob from "glob";
 import path from "path";
 import chalk from "chalk";
-import { Sequelize } from "sequelize";
+import knex from "knex";
 
-import { BaseAction, SequelizeStatus } from "./base.action";
-import { Type } from "../../utils/types";
+import { BaseAction } from "./base.action";
+import { Type, Configuration } from "../../utils/types";
 
 interface ExecOptions {
-  sequelize: Sequelize;
+  knex: ReturnType<typeof knex>;
   cwd: string;
   f: string;
   undo: boolean;
   type: Type;
   name?: string;
-  model: SequelizeStatus | typeof SequelizeStatus;
-}
-
-function isInstance(
-  undo: boolean,
-  model: SequelizeStatus | typeof SequelizeStatus
-): model is SequelizeStatus {
-  return undo === true;
+  config: Configuration;
 }
 
 @Service()
@@ -29,25 +22,14 @@ export class RunAction {
   @Inject()
   private readonly base: BaseAction;
 
-  public async exec({
-    cwd,
-    type,
-    f,
-    undo,
-    sequelize,
-    name,
-    model,
-  }: ExecOptions) {
+  public async exec({ cwd, type, f, undo, knex, name, config }: ExecOptions) {
     const tmp = path.resolve(cwd, "tmp", path.basename(f, ".ts") + ".js");
 
     process.stdout.write(`- ${f}: ${chalk.blue(undo ? "undoing" : "upping")}`);
 
     try {
       const module = await import(tmp);
-      await module.default[undo ? "down" : "up"](
-        sequelize.getQueryInterface(),
-        sequelize.Sequelize
-      );
+      await module.default[undo ? "down" : "up"](knex);
 
       process.stdout.clearLine(0);
       process.stdout.cursorTo(0);
@@ -55,10 +37,12 @@ export class RunAction {
         `- ${f}: ${chalk.green(undo ? "undone" : "upped")}\n`
       );
 
-      if (isInstance(undo, model)) {
-        await model.destroy();
+      if (undo) {
+        await knex(config.tableName)
+          .delete()
+          .where("name", path.basename(f, ".ts"));
       } else {
-        await model.create({ type, name: name ?? f });
+        await knex(config.tableName).insert({ type, name: name ?? f });
       }
     } catch (error) {
       console.log(`- ${f}:`, chalk.red("failure"));
@@ -72,8 +56,7 @@ export class RunAction {
     params: { undo: boolean; clean: boolean }
   ) {
     const config = await this.base.getConfig();
-    const sequelize = await this.base.getSequelize(config);
-    const model = await this.base.getStatusModel();
+    const knex = await this.base.getConnection(config);
     const cwd = process.cwd();
 
     const p = type === "migration" ? config.migrations : config.seeds;
@@ -92,7 +75,9 @@ export class RunAction {
       }
     }
 
-    const already = await model.findAll({ where: { type } });
+    const already = await knex(config.tableName)
+      .select()
+      .where("type", type);
     this.base.logger.info(`Founded ${files.length} ${type}s`);
 
     if (params.undo) {
@@ -107,8 +92,8 @@ export class RunAction {
             undo: true,
             type,
             name: path.basename(f, ".ts"),
-            model: inst,
-            sequelize,
+            knex,
+            config,
           });
 
           i += 1;
@@ -130,8 +115,8 @@ export class RunAction {
             undo: false,
             type,
             name: path.basename(f, ".ts"),
-            model,
-            sequelize,
+            knex,
+            config,
           });
 
           i += 1;

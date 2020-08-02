@@ -3,7 +3,7 @@ import glob from "glob";
 import chalk from "chalk";
 import path from "path";
 
-import { BaseAction, SequelizeStatus } from "./base.action";
+import { BaseAction } from "./base.action";
 import { Type } from "../../utils/types";
 
 @Service()
@@ -11,7 +11,11 @@ export class StatusAction {
   @Inject()
   private readonly base: BaseAction;
 
-  private print(files: string[], runned: SequelizeStatus[], type: Type) {
+  private print(
+    files: string[],
+    runned: { name: string; type: Type }[],
+    type: Type
+  ) {
     for (const f of files) {
       const status = runned.find(
         (x) => x.name.includes(path.basename(f, ".ts")) && x.type === type
@@ -27,13 +31,15 @@ export class StatusAction {
 
   public async run(type?: Type) {
     const config = await this.base.getConfig();
-    const model = await this.base.getStatusModel(config);
+    const knex = await this.base.getConnection(config);
     const cwd = process.cwd();
 
     this.base.logger.info("Checking status");
 
     if (type) {
-      const runned = await model.findAll({ where: { type: type } });
+      const runned = await knex(config.tableName)
+        .select()
+        .where("type", type);
 
       const p = type === "migration" ? config.migrations : config.seeds;
 
@@ -43,7 +49,7 @@ export class StatusAction {
 
       this.print(files, runned, type);
     } else {
-      const runned = await model.findAll();
+      const runned = await knex(config.tableName).select();
 
       const migrations = glob.sync(config.migrations + "/*.ts", {
         cwd,

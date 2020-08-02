@@ -1,18 +1,16 @@
 import { Service } from "typedi";
-import { Sequelize } from "sequelize";
+import knex from "knex";
 
 import { readConfig } from "../../utils/config";
-import { connect, SequelizeStatus } from "../../utils/connect";
+import { connect } from "../../utils/connect";
 import { Configuration } from "../../utils/types";
 import { Logger } from "../../utils/logger";
-
-export { SequelizeStatus };
 
 @Service()
 export class BaseAction {
   private config!: Configuration;
 
-  private sequelize!: [Sequelize, typeof SequelizeStatus];
+  private knex!: ReturnType<typeof knex>;
 
   public readonly logger = new Logger();
 
@@ -24,25 +22,16 @@ export class BaseAction {
     return this.config;
   }
 
-  public async getSequelize(config?: Configuration) {
-    if (!this.sequelize && config) {
+  public async getConnection(config?: Configuration) {
+    if (!this.knex && config) {
       this.logger.verbose("Connecting to database");
-      this.sequelize = await connect(config);
+      this.knex = await connect(config);
     }
 
-    return this.sequelize[0];
+    return this.knex;
   }
 
   public hasSequelize() {
-    return !!this.sequelize;
-  }
-
-  public async getStatusModel(config?: Configuration) {
-    if (!this.sequelize && config) {
-      this.logger.verbose("Connecting to database");
-      this.sequelize = await connect(config);
-    }
-
-    return this.sequelize[1];
+    return !!this.knex;
   }
 }

@@ -33,9 +33,9 @@ export async function readConfig(logger: Logger): Promise<Configuration> {
 
     const content = await import(relative);
 
-    await configSchema.validate(content.default);
+    const config = await configSchema.validate(content.default);
 
-    return content.default;
+    return config;
   } else {
     throw new Error("No configuration file found");
   }

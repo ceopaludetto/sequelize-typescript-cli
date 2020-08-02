@@ -1,46 +1,19 @@
-import { Sequelize, Model, DataTypes } from "sequelize";
+import knex from "knex";
 
-import { Configuration, Type } from "./types";
+import { Configuration } from "./types";
 
-interface SequelizeStatusAttributes {
-  name: string;
-  type: Type;
-}
+export async function connect(config: Configuration) {
+  const connection = knex(config.knex);
 
-export class SequelizeStatus extends Model<SequelizeStatusAttributes>
-  implements SequelizeStatusAttributes {
-  public name!: string;
+  if (!(await connection.schema.hasTable(config.tableName))) {
+    await connection.schema.createTable(config.tableName, (table) => {
+      table.increments();
+      table.string("name").notNullable();
+      table.enum("type", ["migration", "seed"]).notNullable();
+      table.timestamp("createdAt").defaultTo(connection.fn.now());
+      table.timestamp("updatedAt").defaultTo(connection.fn.now());
+    });
+  }
 
-  public type!: Type;
-}
-
-export async function connect(
-  config: Configuration
-): Promise<[Sequelize, typeof SequelizeStatus]> {
-  const sequelize = new Sequelize({ ...config.sequelize, logging: false });
-
-  SequelizeStatus.init(
-    {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      type: {
-        type: DataTypes.ENUM("seed", "migration"),
-        allowNull: false,
-      },
-    },
-    {
-      sequelize,
-      tableName: "SequelizeStatus",
-      modelName: "SequelizeStatus",
-      freezeTableName: true,
-    }
-  );
-
-  await sequelize.authenticate();
-
-  await sequelize.sync();
-
-  return [sequelize, SequelizeStatus];
+  return connection;
 }

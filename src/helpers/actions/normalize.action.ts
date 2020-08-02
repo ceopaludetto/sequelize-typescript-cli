@@ -7,7 +7,6 @@ import CustomParse from "dayjs/plugin/customParseFormat";
 import { kebabCase } from "lodash";
 
 import { BaseAction } from "./base.action";
-import { TableHints } from "sequelize/types";
 
 dayjs.extend(CustomParse);
 

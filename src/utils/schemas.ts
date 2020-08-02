@@ -1,11 +1,14 @@
 import * as Yup from "yup";
 import { Configuration } from "webpack";
-import { Options } from "sequelize";
+import { Config } from "knex";
 
 import * as Messages from "./messages";
 
 export const configSchema = Yup.object({
-  sequelize: Yup.mixed<Options>().required(Messages.REQUIRED),
+  knex: Yup.mixed<Config>().required(Messages.REQUIRED),
+  tableName: Yup.string()
+    .notRequired()
+    .default("DatabaseStatus"),
   migrations: Yup.string().required(Messages.REQUIRED),
   seeds: Yup.string().required(Messages.REQUIRED),
   banners: Yup.mixed<string | string[]>()
@@ -24,7 +27,8 @@ export const configSchema = Yup.object({
       }
 
       return false;
-    }),
+    })
+    .default("YYYY.MM.DD.HH.mm.ss"),
   customize: Yup.mixed<(config: Configuration) => Configuration>()
     .nullable()
     .notRequired(),

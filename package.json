@@ -1,10 +1,10 @@
 {
-  "name": "sequelize-typescript-cli",
+  "name": "typescript-database",
   "version": "1.1.0",
   "main": "./dist/index.js",
-  "module": "./dist/sequelize-typescript.esm.js",
+  "module": "./dist/typescript-database.esm.js",
   "bin": {
-    "sequelize-typescript": "./bin/index.js"
+    "typescript-database": "./bin/index.js"
   },
   "author": "Carlos Eduardo",
   "license": "MIT",

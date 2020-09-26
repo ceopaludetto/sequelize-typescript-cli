@@ -45,7 +45,9 @@ export class RunAction {
         await knex(config.tableName).insert({ type, name: name ?? f });
       }
     } catch (error) {
-      console.log(`- ${f}:`, chalk.red("failure"));
+      process.stdout.clearLine(0);
+      process.stdout.cursorTo(0);
+      process.stdout.write(`- ${f}: ${chalk.red("failure")}\n`);
       this.base.logger.error(error.message);
     }
   }

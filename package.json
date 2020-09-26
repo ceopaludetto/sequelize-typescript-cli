@@ -12,6 +12,7 @@
     "start": "tsdx watch -i src/index.ts --target node",
     "build": "tsdx build -i src/index.ts --target node",
     "lint": "tsdx lint",
+    "test": "tsdx test",
     "prepare": "yarn build"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
     "@types/webpack": "^4.41.21",
     "@types/webpack-node-externals": "^2.5.0",
     "@types/yup": "^0.29.3",
+    "sqlite3": "^5.0.0",
     "tsdx": "^0.13.2"
   },
   "dependencies": {

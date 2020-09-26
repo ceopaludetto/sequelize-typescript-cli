@@ -16,4 +16,8 @@ export class Logger {
   public verbose(msg: string) {
     return console.log(chalk.yellow("verbose"), chalk.reset(msg));
   }
+
+  public log(msg: string) {
+    return console.log(msg);
+  }
 }

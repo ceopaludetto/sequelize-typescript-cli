@@ -106,7 +106,7 @@ export async function bootstrap() {
 
     await program.parseAsync(process.argv);
 
-    if (base.hasSequelize()) {
+    if (base.hasInstanceOfKnex()) {
       base.logger.verbose("Closing database connection");
       await (await base.getConnection()).destroy();
     }

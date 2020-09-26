@@ -31,7 +31,7 @@ export class BaseAction {
     return this.knex;
   }
 
-  public hasSequelize() {
+  public hasInstanceOfKnex() {
     return !!this.knex;
   }
 }

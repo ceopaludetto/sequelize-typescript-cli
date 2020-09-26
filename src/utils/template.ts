@@ -1,4 +1,5 @@
 import { TemplateString } from "./string";
+import { EOL } from "os";
 
 export function configurationTemplate() {
   let template = new TemplateString();
@@ -16,13 +17,16 @@ export function configurationTemplate() {
   return template.value;
 }
 
-export function migrationTemplate(banners?: string | string[]) {
+export function migrationTemplate(
+  importAsType = false,
+  banners?: string | string[]
+) {
   let template = new TemplateString();
-  template.push('import knex from "knex"');
+  template.push(`import ${importAsType ? "type " : ""}knex from "knex"`);
   template.push();
   if (banners) {
     if (typeof banners === "string") {
-      banners = banners.split("\n");
+      banners = banners.split(EOL);
     }
 
     banners.forEach((b) => {

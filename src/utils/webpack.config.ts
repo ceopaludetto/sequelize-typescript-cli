@@ -1,4 +1,4 @@
-import { Configuration } from "webpack";
+import type { Configuration } from "webpack";
 import externals from "webpack-node-externals";
 import path from "path";
 
@@ -28,7 +28,7 @@ export function getConfiguration(
           test: /\.ts$/,
           use: [
             {
-              loader: "babel-loader",
+              loader: require.resolve("babel-loader"),
               options: {
                 babelrc: false,
                 configFile: false,
@@ -46,7 +46,7 @@ export function getConfiguration(
               },
             },
             {
-              loader: "ts-loader",
+              loader: require.resolve("ts-loader"),
               options: {
                 transpileOnly: true,
                 configFile: path.resolve(cwd, "tsconfig.json"),

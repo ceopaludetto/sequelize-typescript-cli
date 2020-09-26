@@ -4,4 +4,6 @@ import { configSchema } from "./schemas";
 
 export type Type = "migration" | "seed";
 
-export type Configuration = Yup.InferType<typeof configSchema>;
+export type Configuration = Yup.InferType<typeof configSchema> & {
+  importAsType: boolean;
+};

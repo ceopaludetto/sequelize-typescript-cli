@@ -33,7 +33,26 @@ export async function readConfig(logger: Logger): Promise<Configuration> {
 
     const content = await import(relative);
 
-    const config = await configSchema.validate(content.default);
+    const config = (await configSchema.validate(
+      content.default
+    )) as Configuration;
+
+    const stats = await fs.stat(config.tsConfig);
+
+    config.importAsType = false;
+
+    if (stats) {
+      const tsConfigFile = await fs.readJSON(config.tsConfig);
+
+      if (
+        tsConfigFile &&
+        tsConfigFile.importsNotUsedAsValues &&
+        (tsConfigFile.importsNotUsedAsValues.toLowerCase() === "error" ||
+          tsConfigFile.importsNotUsedAsValues.toLowerCase() === "remove")
+      ) {
+        config.importAsType = true;
+      }
+    }
 
     return config;
   } else {
@@ -56,6 +75,6 @@ export async function genConfig(logger: Logger) {
 
     await fs.writeFile(relative, configurationTemplate());
     logger.success("Configuration file successfully created");
-    console.log(`- ${relative}`);
+    logger.log(`- ${relative}`);
   }
 }

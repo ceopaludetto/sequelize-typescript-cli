@@ -28,7 +28,10 @@ export class GenerateAction {
 
     if (!(await fs.pathExists(relative))) {
       await fs.ensureFile(relative);
-      await fs.writeFile(relative, migrationTemplate(config.banners));
+      await fs.writeFile(
+        relative,
+        migrationTemplate(config.importAsType, config.banners)
+      );
     }
 
     this.base.logger.success(`${capitalize(type)} generated successfuly`);

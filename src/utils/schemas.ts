@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 import { Configuration } from "webpack";
 import { Config } from "knex";
+import path from "path";
 
 import * as Messages from "./messages";
 
@@ -32,4 +33,8 @@ export const configSchema = Yup.object({
   customize: Yup.mixed<(config: Configuration) => Configuration>()
     .nullable()
     .notRequired(),
+  tsConfig: Yup.string()
+    .nullable()
+    .notRequired()
+    .default(path.resolve(process.cwd(), "tsconfig.json")),
 });

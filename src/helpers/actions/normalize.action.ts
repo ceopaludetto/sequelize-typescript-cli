@@ -13,7 +13,7 @@ dayjs.extend(CustomParse);
 @Service()
 export class NormalizeAction {
   @Inject()
-  private readonly base: BaseAction;
+  private readonly base!: BaseAction;
 
   private async rename(p: string, from: string, to: string, cwd: string) {
     const files = glob.sync(p + "/*.ts", { cwd });

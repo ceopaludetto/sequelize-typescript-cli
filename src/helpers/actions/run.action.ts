@@ -20,7 +20,7 @@ interface ExecOptions {
 @Service()
 export class RunAction {
   @Inject()
-  private readonly base: BaseAction;
+  private readonly base!: BaseAction;
 
   public async exec({ cwd, type, f, undo, knex, name, config }: ExecOptions) {
     const tmp = path.resolve(cwd, "tmp", path.basename(f, ".ts") + ".js");

@@ -9,7 +9,7 @@ import { Type } from "../../utils/types";
 @Service()
 export class StatusAction {
   @Inject()
-  private readonly base: BaseAction;
+  private readonly base!: BaseAction;
 
   private print(
     files: string[],

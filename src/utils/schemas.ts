@@ -18,7 +18,7 @@ export const configSchema = Yup.object({
   dateFormat: Yup.string()
     .nullable()
     .notRequired()
-    .test("slash", Messages.SLASH, (v: string) => {
+    .test("slash", Messages.SLASH, (v) => {
       if (!v) {
         return true;
       }
@@ -37,4 +37,4 @@ export const configSchema = Yup.object({
     .nullable()
     .notRequired()
     .default(path.resolve(process.cwd(), "tsconfig.json")),
-});
+}).required();

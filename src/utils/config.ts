@@ -6,6 +6,7 @@ import { possible } from "./files";
 import { configSchema } from "./schemas";
 import { configurationTemplate } from "./template";
 import { Configuration } from "./types";
+import { hasImportUnusedAsType } from "./tsconfig";
 
 async function ensure(cwd: string) {
   return Promise.all(
@@ -33,28 +34,21 @@ export async function readConfig(logger: Logger): Promise<Configuration> {
 
     const content = await import(relative);
 
-    const config = (await configSchema.validate(
-      content.default
-    )) as Configuration;
+    const config = await configSchema.validate(content.default);
 
-    const stats = await fs.stat(config.tsConfig);
+    const stats = config.tsConfig ? await fs.stat(config.tsConfig) : undefined;
 
-    config.importAsType = false;
+    let additional: Configuration = { ...config, importAsType: false };
 
     if (stats) {
-      const tsConfigFile = await fs.readJSON(config.tsConfig);
+      const tsConfigFile = config.tsConfig ? await import(config.tsConfig) : {};
 
-      if (
-        tsConfigFile &&
-        tsConfigFile.importsNotUsedAsValues &&
-        (tsConfigFile.importsNotUsedAsValues.toLowerCase() === "error" ||
-          tsConfigFile.importsNotUsedAsValues.toLowerCase() === "remove")
-      ) {
-        config.importAsType = true;
+      if (hasImportUnusedAsType(tsConfigFile)) {
+        additional.importAsType = true;
       }
     }
 
-    return config;
+    return additional;
   } else {
     throw new Error("No configuration file found");
   }

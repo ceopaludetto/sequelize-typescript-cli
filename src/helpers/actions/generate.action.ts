@@ -11,7 +11,7 @@ import { Type } from "../../utils/types";
 @Service()
 export class GenerateAction {
   @Inject()
-  private readonly base: BaseAction;
+  private readonly base!: BaseAction;
 
   public async run(type: Type, name: string) {
     this.base.logger.info(`Generating new ${type}`);

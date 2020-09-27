@@ -10,7 +10,7 @@ import { Type } from "../../utils/types";
 @Service()
 export class CompileAction {
   @Inject()
-  private readonly base: BaseAction;
+  private readonly base!: BaseAction;
 
   public async run(type?: Type) {
     const config = await this.base.getConfig();
@@ -22,6 +22,7 @@ export class CompileAction {
       const entry = type === "migration" ? "migrations" : "seeds";
 
       const path = glob.sync(config[entry] + "/*.ts", { cwd });
+
       const compiler = webpack(getConfiguration(path, cwd, config.customize));
 
       const res = await new Promise((resolve, reject) => {
